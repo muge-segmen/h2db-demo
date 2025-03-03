@@ -2,7 +2,7 @@ This is a backend api for a brokage firm so that their employees can send, list 
 
 Endpoints:
 
-POST /initializeDB: additional endpoint to create a new DB and create tables that are needed for the project and also create and grant table rights to user roles. this endpoint is used to initialize and set up desired DB at the beginning of the project.
+POST /initializeDB: additional endpoint to create a new DB, create tables that are needed for the project, and also create and grant table rights to user roles. this endpoint is used to initialize and set up desired DB and MUST be called at the beginning of the project to provide the requirements.
 
 POST /login: connects to the db with the given credentials. inputs: String customerName, String password. As a response db connection established. All the following endpoints required a db connection, so this method should be called at the very beginning.
 
@@ -41,6 +41,8 @@ Role: ADMIN, MOD, PUBLIC
 
 
 Notes:
+* initializeDB MUST be called at the very beginning of the tests. Otherwise, tables and rights will be missing and methods will fail.
 * additional endpoints are not within the scope of the task but added for creating and setting the database for the project and test purposes.
 * for authorization, instead of only checking whether user is admin, user roles are used. three different roles are defined and grant different permissions for each role. (to set up these roles and grant permissions to each roles, initializeDB method can be called before testing the other methods).
 * as there is no detailed information about what is usableSize and how to use it for the orders, size value is used instead usableSize.
+* h2db demo postman collection is added under the resources directory for sample requests of each endpoint.
