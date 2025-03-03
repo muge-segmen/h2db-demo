@@ -1,20 +1,23 @@
 package ing.controller;
 
-import ing.models.OrderSide;
-import ing.models.Role;
-import ing.models.Status;
+import ing.dto.Customer;
+import ing.dto.Order;
+import ing.model.*;
 import ing.service.DemoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/demo")
 @RequiredArgsConstructor
 public class DemoController {
 
+    @Autowired
     private final DemoService demoService;
 
     @PostMapping("/initializeDB")
@@ -79,23 +82,23 @@ public class DemoController {
     }
 
     @GetMapping("/list-all-entities")
-    public void listAllOrders(@RequestParam String tableName) throws SQLException {
-        demoService.listAllEntities(tableName);
+    public Object listAllEntities(@RequestParam String tableName) throws SQLException {
+        return demoService.listAllEntities(tableName);
     }
 
     @GetMapping("/list-customer-records")
-    public void listCustomerOrders(@RequestParam int customerId, @RequestParam String tableName) throws SQLException {
-        demoService.listCustomerRecords(customerId, tableName);
+    public Object listCustomerOrders(@RequestParam int customerId, @RequestParam String tableName) throws SQLException {
+        return demoService.listCustomerRecords(customerId, tableName);
     }
 
     @GetMapping("/list-pending-orders")
-    public void listPendingOrders() throws SQLException {
-        demoService.listPendingOrders();
+    public List<Order> listPendingOrders() throws SQLException {
+        return demoService.listPendingOrders();
     }
 
     @GetMapping("/list-customers")
-    public void listCustomers() throws SQLException {
-        demoService.listCustomers();
+    public List<Customer> listCustomers() throws SQLException {
+        return demoService.listCustomers();
     }
 
 //    //constructor without lombok

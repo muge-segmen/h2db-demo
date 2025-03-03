@@ -1,14 +1,18 @@
 package ing.service;
 
-import ing.models.OrderSide;
-import ing.models.Role;
-import ing.models.Status;
+import ing.dto.Asset;
+import ing.dto.Customer;
+import ing.dto.Order;
+import ing.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -17,61 +21,80 @@ public class DemoService {
 
     public static Connection connection;
 
+    @Autowired
+    JdbcTemplate template;
+
     public void initializeDB(String customerName, String password) throws SQLException {
         //connect to DB
         String jdbcURL = "jdbc:h2:tcp://localhost/~/test";
         Connection conn = DriverManager.getConnection(jdbcURL, customerName, password);
         log.info("Connection established.");
-        Statement initializeStatement = conn.createStatement();
 
+        PreparedStatement initializeStatement;
         //create tables
-        String sqlInitialize = "CREATE TABLE Orders (id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, customerId INTEGER NOT NULL, assetName VARCHAR(50) NOT NULL, orderSide VARCHAR(5) NOT NULL, size BIGINT NOT NULL, price DOUBLE PRECISION NOT NULL, status VARCHAR(10) NOT NULL, createDate DATE NOT NULL)";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "CREATE TABLE Assets (id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, customerId INTEGER NOT NULL, assetName VARCHAR(50) NOT NULL, size BIGINT NOT NULL)";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "CREATE TABLE Customers (customerId INTEGER NOT NULL, customerName VARCHAR(50) NOT NULL, password VARCHAR(8) NOT NULL, isAdmin BOOLEAN NOT NULL, role VARCHAR(10) NOT NULL)";
-        initializeStatement.executeQuery(sqlInitialize);
+        initializeStatement = conn.prepareStatement("CREATE TABLE Orders (id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, customerId INTEGER NOT NULL, assetName VARCHAR(50) NOT NULL, orderSide VARCHAR(5) NOT NULL, size BIGINT NOT NULL, price DOUBLE PRECISION NOT NULL, status VARCHAR(10) NOT NULL, createDate DATE NOT NULL)");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("CREATE TABLE Assets (id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, customerId INTEGER NOT NULL, assetName VARCHAR(50) NOT NULL, size BIGINT NOT NULL)");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("CREATE TABLE Customers (customerId INTEGER NOT NULL, customerName VARCHAR(50) NOT NULL, password VARCHAR(8) NOT NULL, isAdmin BOOLEAN NOT NULL, role VARCHAR(10) NOT NULL)");
+        initializeStatement.executeUpdate();
+
+        //add admin user to customers table
+        initializeStatement = conn.prepareStatement("INSERT INTO Customers (customerId, customerName, password , isAdmin, role) VALUES (1, 'ADMIN', '1234', true, 'ADMIN')");
+        initializeStatement.executeUpdate();
 
         //create user roles
-        sqlInitialize = "CREATE ROLE MOD";
-        initializeStatement.executeQuery(sqlInitialize);
+        initializeStatement = conn.prepareStatement("CREATE ROLE MOD");
+        initializeStatement.executeUpdate();
 
         //grant table rights to roles
-        sqlInitialize = "GRANT SELECT ON ORDERS TO PUBLIC";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "GRANT INSERT ON ORDERS TO PUBLIC";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "GRANT UPDATE ON ORDERS TO PUBLIC";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "GRANT DELETE ON ORDERS TO PUBLIC";
-        initializeStatement.executeQuery(sqlInitialize);
+        initializeStatement = conn.prepareStatement("GRANT SELECT ON ORDERS TO PUBLIC");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT INSERT ON ORDERS TO PUBLIC");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT UPDATE ON ORDERS TO PUBLIC");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT DELETE ON ORDERS TO PUBLIC");
+        initializeStatement.executeUpdate();
 
-        sqlInitialize = "GRANT SELECT ON ASSETS TO PUBLIC";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "GRANT INSERT ON ASSETS TO PUBLIC";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "GRANT UPDATE ON ASSETS TO PUBLIC";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "GRANT DELETE ON ASSETS TO PUBLIC";
-        initializeStatement.executeQuery(sqlInitialize);
+        initializeStatement = conn.prepareStatement("GRANT SELECT ON ASSETS TO PUBLIC");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT INSERT ON ASSETS TO PUBLIC");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT UPDATE ON ASSETS TO PUBLIC");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT DELETE ON ASSETS TO PUBLIC");
+        initializeStatement.executeUpdate();
 
-        sqlInitialize = "GRANT SELECT ON ORDERS TO MOD";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "GRANT INSERT ON ORDERS TO MOD";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "GRANT UPDATE ON ORDERS TO MOD";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "GRANT DELETE ON ORDERS TO MOD";
-        initializeStatement.executeQuery(sqlInitialize);
+        initializeStatement = conn.prepareStatement("GRANT SELECT ON ORDERS TO MOD");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT INSERT ON ORDERS TO MOD");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT UPDATE ON ORDERS TO MOD");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT DELETE ON ORDERS TO MOD");
+        initializeStatement.executeUpdate();
 
-        sqlInitialize = "GRANT SELECT ON ASSETS TO MOD";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "GRANT INSERT ON ASSETS TO MOD";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "GRANT UPDATE ON ASSETS TO MOD";
-        initializeStatement.executeQuery(sqlInitialize);
-        sqlInitialize = "GRANT DELETE ON ASSETS TO MOD";
-        initializeStatement.executeQuery(sqlInitialize);
+        initializeStatement = conn.prepareStatement("GRANT SELECT ON ASSETS TO MOD");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT INSERT ON ASSETS TO MOD");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT UPDATE ON ASSETS TO MOD");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT DELETE ON ASSETS TO MOD");
+        initializeStatement.executeUpdate();
+
+        initializeStatement = conn.prepareStatement("GRANT SELECT ON CUSTOMERS TO MOD");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT INSERT ON CUSTOMERS TO MOD");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT UPDATE ON CUSTOMERS TO MOD");
+        initializeStatement.executeUpdate();
+        initializeStatement = conn.prepareStatement("GRANT DELETE ON CUSTOMERS TO MOD");
+        initializeStatement.executeUpdate();
+
+        initializeStatement = conn.prepareStatement("GRANT SELECT ON CUSTOMERS TO PUBLIC");
+        initializeStatement.executeUpdate();
     }
 
     public void login(String customerName, String password) throws SQLException {
@@ -82,7 +105,14 @@ public class DemoService {
 
     public void logout() throws SQLException {
         connection.close();
+        connection = null;
         log.info("Connection terminated.");
+    }
+
+    public void checkLogin() {
+        if (connection == null) {
+            throw new RuntimeException("Login needed");
+        }
     }
 
     public boolean isAdmin() throws SQLException {
@@ -96,6 +126,9 @@ public class DemoService {
 
     //only available for admin users
     public void addUser(String customerName, String password, int customerId, boolean isAdmin, Role role) throws SQLException {
+        //checks for login
+        checkLogin();
+
         if (customerId < 1) {
             throw new RuntimeException("Customer id must be a positive number");
         }
@@ -108,31 +141,35 @@ public class DemoService {
         sql.executeUpdate();
 
         //whenever add a user to db also add that user to customers table
-        sql = connection.prepareStatement("INSERT INTO Customers (customerId,  customerName,  password,  isAdmin,  role)" +
-                "VALUES (" + customerId + ", '" + customerName.toUpperCase() + "', '" + password + "', " + isAdmin + ", '" + role + "')");
+        int items = template.update(connectionList -> connection.prepareStatement("INSERT INTO Customers (customerId,  customerName,  password,  isAdmin,  role)" +
+                "VALUES (" + customerId + ", '" + customerName.toUpperCase() + "', '" + password + "', " + isAdmin + ", '" + role + "')"));
 
-        int rows = sql.executeUpdate();
-        if (rows > 0) {
+        if (items > 0) {
             log.info("Inserted a new customer.");
         }
     }
 
     //only available for admin users
     public void deleteUser(String customerName) throws SQLException {
+        //checks for login
+        checkLogin();
+
         PreparedStatement sql = connection.prepareStatement("DROP USER IF EXISTS " + customerName);
         sql.executeUpdate();
 
         //whenever remove a user from db also remove that user from customers table
-        sql = connection.prepareStatement("DELETE FROM Customers WHERE customerName = '" + customerName.toUpperCase() + "'");
+        int items = template.update(connectionList -> connection.prepareStatement("DELETE FROM Customers WHERE customerName = '" + customerName.toUpperCase() + "'"));
 
-        int rows = sql.executeUpdate();
-        if (rows > 0) {
+        if (items > 0) {
             log.info("Removed customer named {}", customerName);
         }
     }
 
     //only available for admin users
     public void createTable(String tableName) throws SQLException {
+        //checks for login
+        checkLogin();
+
         PreparedStatement sql = null;
         if (tableName.equalsIgnoreCase("Orders"))
             sql = connection.prepareStatement("CREATE TABLE " + tableName + " (id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, customerId INTEGER NOT NULL, assetName VARCHAR(50) NOT NULL, orderSide VARCHAR(5) NOT NULL, size BIGINT NOT NULL, price DOUBLE PRECISION NOT NULL, status VARCHAR(10) NOT NULL, createDate DATE NOT NULL)");
@@ -150,6 +187,9 @@ public class DemoService {
 
     //only available for admin users
     public void clearTable(String tableName) throws SQLException {
+        //checks for login
+        checkLogin();
+
         PreparedStatement sql = connection.prepareStatement("TRUNCATE TABLE " + tableName);
         int rows = sql.executeUpdate();
 
@@ -160,6 +200,9 @@ public class DemoService {
 
     //only available for admin users
     public void deleteTable(String tableName) throws SQLException {
+        //checks for login
+        checkLogin();
+
         PreparedStatement sql = connection.prepareStatement("DROP TABLE " + tableName);
         int rows = sql.executeUpdate();
 
@@ -263,6 +306,9 @@ public class DemoService {
     }
 
     public void insert(int customerId, String assetName, OrderSide orderSide, int size, Double price, Status status, LocalDate createDate) throws SQLException {
+        //checks for login
+        checkLogin();
+
         PreparedStatement customer = connection.prepareStatement("SELECT * FROM Customers WHERE customerName = '" + connection.getMetaData().getUserName() + "'");
         customer.executeQuery();
         ResultSet rsCustomer = customer.getResultSet();
@@ -289,6 +335,8 @@ public class DemoService {
     }
 
     public void delete(int id) throws SQLException {
+        //checks for login
+        checkLogin();
         //checks whether user is admin
         if (!isAdmin()) {
             checkPermission(id, null);
@@ -303,6 +351,9 @@ public class DemoService {
     }
 
     public void update(int id, Status status) throws SQLException {
+        //checks for login
+        checkLogin();
+
         PreparedStatement select = connection.prepareStatement("SELECT * FROM Orders WHERE id = " + id);
         ResultSet rs = select.executeQuery();
         rs.next();
@@ -343,104 +394,156 @@ public class DemoService {
         checkAndUpdateAssetTable(connection, rsAsset, assetExist, status, side, size, customerId, assetName);
     }
 
-    public void listAllEntities(String tableName) throws SQLException {
+    public Object listAllEntities(String tableName) throws SQLException {
+        //checks for login
+        checkLogin();
         //checks for user role
         int checkId = checkListingPermission();
         if (checkId != -1) {
             throw new RuntimeException("No permission to list all entities");
         }
 
-        PreparedStatement sql = connection.prepareStatement("SELECT * FROM " + tableName);
-        sql.executeQuery();
+        if (tableName.equals("Orders")) {
+            List<Order> items;
+            items = template.query(connectionList -> connection.prepareStatement("SELECT * FROM " + tableName), (result, rowNum) -> new Order(result.getInt("id"), result.getInt("customerId"), result.getString("assetName"), OrderSide.valueOf(result.getString("orderSide")), result.getInt("size"), result.getDouble("price"), Status.valueOf(result.getString("status")), LocalDate.parse(result.getString("createDate"))));
 
-        ResultSet rs = sql.getResultSet();
-        ResultSetMetaData meta = rs.getMetaData();
-
-        //prints all table values
-        int count = 1;
-        while (rs.next()) {
-            log.info("");
-            log.info("{} #{}", tableName, count);
-            for (int i = 0; i < meta.getColumnCount(); i++) {
-                log.info("{}: {}", meta.getColumnLabel(i + 1), rs.getString(i + 1));
+            //prints all table values
+            int count = 1;
+            for (Order item : items) {
+                log.info("");
+                log.info("{} #{}", tableName, count);
+                log.info("{}: {}", "id", item.getId());
+                log.info("{}: {}", "customerId", item.getCustomerId());
+                log.info("{}: {}", "assetName", item.getAssetName());
+                log.info("{}: {}", "orderSide", item.getOrderSide());
+                log.info("{}: {}", "size", item.getSize());
+                log.info("{}: {}", "price", item.getPrice());
+                log.info("{}: {}", "status", item.getStatus());
+                log.info("{}: {}", "createDate", item.getCreateDate());
+                count++;
             }
-            count++;
+            return items;
+        } else {
+            List<Asset> items;
+            items = template.query(connectionList -> connection.prepareStatement("SELECT * FROM " + tableName), (result, rowNum) -> new Asset(result.getInt("id"), result.getInt("customerId"), result.getString("assetName"), result.getInt("size")));
+
+            //prints all table values
+            int count = 1;
+            for (Asset item : items) {
+                log.info("");
+                log.info("{} #{}", tableName, count);
+                log.info("{}: {}", "id", item.getId());
+                log.info("{}: {}", "customerId", item.getCustomerId());
+                log.info("{}: {}", "assetName", item.getAssetName());
+                log.info("{}: {}", "size", item.getSize());
+                count++;
+            }
+            return items;
         }
     }
 
-    public void listCustomerRecords(int customerId, String tableName) throws SQLException {
+    public Object listCustomerRecords(int customerId, String tableName) throws SQLException {
+        //checks for login
+        checkLogin();
         //checks for user role
         //if customer is not admin/moderator then cannot list other customers' records
         int checkId = checkListingPermission();
         if (checkId != -1 && checkId != customerId) {
-            throw new RuntimeException("No permission to list other customer's orders");
+            throw new RuntimeException("No permission to list other customer's records");
         }
 
-        PreparedStatement sql = connection.prepareStatement("SELECT * FROM " + tableName + " WHERE customerId = " + customerId);
-        sql.executeQuery();
+        if (tableName.equals("Orders")) {
+            List<Order> items;
+            items = template.query(connectionList -> connection.prepareStatement("SELECT * FROM " + tableName + " WHERE customerId = " + customerId), (result, rowNum) -> new Order(result.getInt("id"), result.getInt("customerId"), result.getString("assetName"), OrderSide.valueOf(result.getString("orderSide")), result.getInt("size"), result.getDouble("price"), Status.valueOf(result.getString("status")), LocalDate.parse(result.getString("createDate"))));
 
-        ResultSet rs = sql.getResultSet();
-        ResultSetMetaData meta = rs.getMetaData();
-
-        //prints all values for the given customer
-        int count = 1;
-        while (rs.next()) {
-            log.info("");
-            log.info("{} #{} for customer id {}", tableName, count, customerId);
-            for (int i = 0; i < meta.getColumnCount(); i++) {
-                log.info("{}: {}", meta.getColumnLabel(i + 1), rs.getString(i + 1));
+            //prints all values for the given customer
+            int count = 1;
+            for (Order item : items) {
+                log.info("");
+                log.info("{} #{} for customer id {}", tableName, count, customerId);
+                log.info("{}: {}", "id", item.getId());
+                log.info("{}: {}", "customerId", item.getCustomerId());
+                log.info("{}: {}", "assetName", item.getAssetName());
+                log.info("{}: {}", "orderSide", item.getOrderSide());
+                log.info("{}: {}", "size", item.getSize());
+                log.info("{}: {}", "price", item.getPrice());
+                log.info("{}: {}", "status", item.getStatus());
+                log.info("{}: {}", "createDate", item.getCreateDate());
+                count++;
             }
-            count++;
+            return items;
+        } else {
+            List<Asset> items;
+            items = template.query(connectionList -> connection.prepareStatement("SELECT * FROM " + tableName + " WHERE customerId = " + customerId), (result, rowNum) -> new Asset(result.getInt("id"), result.getInt("customerId"), result.getString("assetName"), result.getInt("size")));
+
+            //prints all values for the given customer
+            int count = 1;
+            for (Asset item : items) {
+                log.info("");
+                log.info("{} #{} for customer id {}", tableName, count, customerId);
+                log.info("{}: {}", "id", item.getId());
+                log.info("{}: {}", "customerId", item.getCustomerId());
+                log.info("{}: {}", "assetName", item.getAssetName());
+                log.info("{}: {}", "size", item.getSize());
+                count++;
+            }
+            return items;
         }
     }
 
-    public void listPendingOrders() throws SQLException {
+    public List<Order> listPendingOrders() throws SQLException {
+        //checks for login
+        checkLogin();
         //checks for user role
         int checkId = checkListingPermission();
         if (checkId != -1) {
             throw new RuntimeException("No permission to list pending orders");
         }
 
-        PreparedStatement sql = connection.prepareStatement("SELECT * FROM Orders WHERE status = 'PENDING'");
-        sql.executeQuery();
-
-        ResultSet rs = sql.getResultSet();
-        ResultSetMetaData meta = rs.getMetaData();
+        List<Order> items = template.query(connectionList -> connection.prepareStatement("SELECT * FROM Orders WHERE status = 'PENDING'"), (result, rowNum) -> new Order(result.getInt("id"), result.getInt("customerId"), result.getString("assetName"), OrderSide.valueOf(result.getString("orderSide")), result.getInt("size"), result.getDouble("price"), Status.valueOf(result.getString("status")), LocalDate.parse(result.getString("createDate"))));
 
         //prints all pending orders
         int count = 1;
-        while (rs.next()) {
+        for (Order item : items) {
             log.info("");
             log.info("Pending orders #{}", count);
-            for (int i = 0; i < meta.getColumnCount(); i++) {
-                log.info("{}: {}", meta.getColumnLabel(i + 1), rs.getString(i + 1));
-            }
+            log.info("{}: {}", "id", item.getId());
+            log.info("{}: {}", "customerId", item.getCustomerId());
+            log.info("{}: {}", "assetName", item.getAssetName());
+            log.info("{}: {}", "orderSide", item.getOrderSide());
+            log.info("{}: {}", "size", item.getSize());
+            log.info("{}: {}", "price", item.getPrice());
+            log.info("{}: {}", "status", item.getStatus());
+            log.info("{}: {}", "createDate", item.getCreateDate());
             count++;
         }
+        return items;
     }
 
-    public void listCustomers() throws SQLException {
+    public List<Customer> listCustomers() throws SQLException {
+        //checks for login
+        checkLogin();
         //checks for user role
         int checkId = checkListingPermission();
         if (checkId != -1) {
             throw new RuntimeException("No permission to list customers");
         }
 
-        PreparedStatement sql = connection.prepareStatement("SELECT * FROM Customers");
-        sql.executeQuery();
-
-        ResultSet rs = sql.getResultSet();
-        ResultSetMetaData meta = rs.getMetaData();
+        List<Customer> items;
+        items = template.query(connectionList -> connection.prepareStatement("SELECT * FROM Customers"), (result, rowNum) -> new Customer(result.getInt("customerId"), result.getString("customerName"), result.getString("password"), result.getBoolean("isAdmin"), Role.valueOf(result.getString("role"))));
 
         //prints all customers
         int count = 1;
-        while (rs.next()) {
+        for (Customer item : items) {
             log.info("");
             log.info("Customer #{}", count);
-            for (int i = 0; i < meta.getColumnCount(); i++) {
-                log.info("{}: {}", meta.getColumnLabel(i + 1), rs.getString(i + 1));
-            }
+            log.info("{}: {}", "customerId", item.getCustomerId());
+            log.info("{}: {}", "customerName", item.getCustomerName());
+            log.info("{}: {}", "password", item.getPassword());
+            log.info("{}: {}", "isAdmin", item.isAdmin());
+            log.info("{}: {}", "role", item.getRole());
             count++;
         }
+        return items;
     }
 }

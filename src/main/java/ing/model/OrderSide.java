@@ -1,4 +1,4 @@
-package ing.models;
+package ing.model;
 
 public enum OrderSide {
     BUY,
